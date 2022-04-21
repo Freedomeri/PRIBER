@@ -151,7 +151,7 @@ class DittoDataset(SnippextDataset):
         """
         Modified by SUN 2022/03/01
         """
-        x = crypten.cryptensor(x,src=ALICE)
+        #x = crypten.cryptensor(x,src=ALICE)
         y = self.tag2idx[tags] # label
         is_heads = [1] * len(x)
         mask = [1] * len(x)

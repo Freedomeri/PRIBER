@@ -126,8 +126,8 @@ def initialize_and_train(task_config,
                                  collate_fn=padder)
 
     # initialize model
-    #device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    device = 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    #device = 'cpu'
     model = MultiTaskNet([task_config],
                      device,
                      hp.finetuning,

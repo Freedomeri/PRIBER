@@ -1,8 +1,11 @@
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 from torch.utils import data
 from .augment import Augmenter
+
+import crypten
 
 tokenizer = None
 
@@ -269,9 +272,15 @@ class SnippextDataset(data.Dataset):
             return words, f(x), is_heads, tags, f(mask), f(y), seqlens, name
         '''
         f = lambda x: [sample[x] for sample in batch]
+        '''
+            g depends on whether sample[x] is encrypted
+        '''
         g = lambda x, seqlen, val: \
-              [sample[x] + [val] * (seqlen - len(sample[x])) \
-               for sample in batch] # 0: <pad>
+              [sample[x].pad((0,seqlen - len(sample[x])), value=0) \
+               for sample in batch] if x==99 else \
+                  [sample[x] + [val] * (seqlen - len(sample[x])) \
+                   for sample in batch]
+        # 0: <pad>
 
         # get maximal sequence length
         seqlens = f(6)
@@ -291,6 +300,12 @@ class SnippextDataset(data.Dataset):
             y = f(5)
 
         f = torch.LongTensor
+        '''
+            encrypt input_ids
+        '''
+        # fx = crypten.cryptensor(
+        #     x
+        # )
         if isinstance(y[0], float):
             y = torch.Tensor(y)
         else:
