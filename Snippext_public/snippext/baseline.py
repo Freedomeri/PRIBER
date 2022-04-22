@@ -90,7 +90,8 @@ def train(model, train_set, optimizer, scheduler=None, batch_size=32, fp16=False
             print("=======================")
 
         if i%10 == 0: # monitoring
-            print(f"step: {i}, task: {taskname}, loss: {loss.item()}")
+            #print(f"step: {i}, task: {taskname}, loss: {loss.item()}")
+            print(f"step: {i}, task: {taskname}, loss: {loss.get_plain_text().item()}")
             del loss
 
 def initialize_and_train(task_config,

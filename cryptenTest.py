@@ -15,7 +15,7 @@ import os
 import sys
 import argparse
 import json
-
+#os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 sys.path.insert(0, "Snippext_public")
 crypten.init()
 torch.set_num_threads(1)

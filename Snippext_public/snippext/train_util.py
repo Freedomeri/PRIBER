@@ -108,11 +108,13 @@ def eval_classifier(model, iterator):
             else:
                 loss = nn.CrossEntropyLoss()(logits, y1)
 
-            loss_list.append(loss.item() * y.shape[0])
+            loss_list.append(loss.get_plain_text().item() * y.shape[0])
+            #loss_list.append(loss.item() * y.shape[0])
             total_size += y.shape[0]
 
             Y.extend(y.numpy().tolist())
-            Y_hat.extend(y_hat.cpu().numpy().tolist())
+            #Y_hat.extend(y_hat.cpu().numpy().tolist())
+            Y_hat.extend([np.argmax(item) for item in y_hat.cpu().get_plain_text().numpy()])
 
     loss = sum(loss_list) / total_size
 
