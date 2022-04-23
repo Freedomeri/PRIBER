@@ -301,7 +301,7 @@ class CrypTensor(object, metaclass=CrypTensorMetaclass):
             # dispatch torch.{cat,stack} call on CrypTensor to CrypTen:
             return getattr(crypten, STATIC_FUNCTION_MAPPING[func])(*args, **kwargs)
         elif func.__name__ == 'linear':
-            output = args[0].matmul(args[1].t().cuda() if torch.cuda.is_available() else args[1].t())
+            output = args[0].matmul(args[1].t().cuda() if self.device.type == 'cuda' else args[1].t())
             if 'bias' in kwargs:
                 output = output.add(kwargs['bias'])
             return output
@@ -316,7 +316,7 @@ class CrypTensor(object, metaclass=CrypTensorMetaclass):
             return output
         elif func.__name__ == 'layer_norm':
             t_layer_norm = torch.nn.LayerNorm(args[1])
-            t_layer_norm = t_layer_norm.to(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+            t_layer_norm = t_layer_norm.to(device=torch.device('cuda' if self.device.type == 'cuda' else 'cpu'))
             t_output = t_layer_norm(args[0]._tensor.data.type(torch.float32))
             args[0]._tensor.data = t_output.type(torch.int64)
             return args[0]
