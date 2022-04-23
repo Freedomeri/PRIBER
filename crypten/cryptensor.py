@@ -301,7 +301,7 @@ class CrypTensor(object, metaclass=CrypTensorMetaclass):
             # dispatch torch.{cat,stack} call on CrypTensor to CrypTen:
             return getattr(crypten, STATIC_FUNCTION_MAPPING[func])(*args, **kwargs)
         elif func.__name__ == 'linear':
-            output = args[0].matmul(args[1].t().cuda())
+            output = args[0].matmul(args[1].t().cuda() if torch.cuda.is_available() else args[1].t())
             if 'bias' in kwargs:
                 output = output.add(kwargs['bias'])
             return output
