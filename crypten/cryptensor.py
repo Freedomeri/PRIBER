@@ -316,6 +316,7 @@ class CrypTensor(object, metaclass=CrypTensorMetaclass):
             return output
         elif func.__name__ == 'layer_norm':
             t_layer_norm = torch.nn.LayerNorm(args[1])
+            t_layer_norm = t_layer_norm.to(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
             t_output = t_layer_norm(args[0]._tensor.data.type(torch.float32))
             args[0]._tensor.data = t_output.type(torch.int64)
             return args[0]
