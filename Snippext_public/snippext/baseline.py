@@ -91,7 +91,7 @@ def train(model, train_set, optimizer, scheduler=None, batch_size=32, fp16=False
 
         if i%10 == 0: # monitoring
             #print(f"step: {i}, task: {taskname}, loss: {loss.item()}")
-            print(f"step: {i}, task: {taskname}, loss: {loss.get_plain_text().item()}")
+            print(f"step: {i}, task: {taskname}, loss: {loss.get_plain_text().item() if type(loss) == crypten.mpc.mpc.MPCTensor else loss.item()}")
             del loss
 
 def initialize_and_train(task_config,
