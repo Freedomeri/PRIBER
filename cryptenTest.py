@@ -8,6 +8,7 @@ Created on Tue Feb 15 21:02:31 2022
 
 import torch
 import crypten
+crypten.init()
 import crypten.mpc as mpc
 import crypten.communicator as comm
 from transformers import BertTokenizer,BertModel
@@ -17,7 +18,7 @@ import argparse
 import json
 #os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 sys.path.insert(0, "Snippext_public")
-crypten.init()
+
 torch.set_num_threads(1)
 
 from ditto.dataset import DittoDataset
