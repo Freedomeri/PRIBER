@@ -1,0 +1,1 @@
+--task Structured/Beer --batch_size 8 --max_len 512 --lr 5e-5 --n_epochs 100 --lm bert-mini --bert_path "/home/smz/PycharmProjects/CryptenTest/models/bert-mini-finetuned" --summarize --dk product

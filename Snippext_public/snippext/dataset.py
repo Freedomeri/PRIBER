@@ -40,6 +40,12 @@ def get_tokenizer(lm='bert'):
         elif lm == 'ernie':
             from transformers import AutoTokenizer
             tokenizer = AutoTokenizer.from_pretrained('nghuyong/ernie-2.0-en')
+        elif lm == 'bert-tiny':
+            from transformers import BertTokenizer
+            tokenizer = BertTokenizer.from_pretrained('prajjwal1/bert-tiny')
+        elif lm == 'bert-mini':
+            from transformers import BertTokenizer
+            tokenizer = BertTokenizer.from_pretrained('prajjwal1/bert-mini')
     return tokenizer
 
 

@@ -186,8 +186,8 @@ class BertEmbeddings(nn.Module):
         test crypten embedding 2022.0418
         '''
         import crypten
-        #crypten.init()
-        #embeddings = crypten.cryptensor(embeddings.type(torch.float32))
+
+        embeddings = crypten.cryptensor(embeddings.type(torch.float32))
         '''
         test not use MPCTensor but its value
         '''

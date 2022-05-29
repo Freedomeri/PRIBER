@@ -8,7 +8,8 @@ model_ckpts = {'bert': "bert-base-uncased",
                'xlnet': "xlnet-base-cased",
                'distilbert': "distilbert-base-uncased",
                'longformer': "allenai/longformer-base-4096",
-               'ernie': "nghuyong/ernie-2.0-en"}
+               'ernie': "nghuyong/ernie-2.0-en",
+               'bert-tiny':"prajjwal1/bert-tiny"}
 
 class MultiTaskNet(nn.Module):
     def __init__(self, task_configs=[],
@@ -38,27 +39,34 @@ class MultiTaskNet(nn.Module):
             elif lm == 'ernie':
                 self.bert = AutoModel.from_pretrained(model_ckpts[lm])
         else:
-            output_model_file = bert_path
-            model_state_dict = torch.load(output_model_file,
-                                          map_location=lambda storage, loc: storage)
-            if lm == 'bert':
-                self.bert = BertModel.from_pretrained(model_ckpts[lm],
-                        state_dict=model_state_dict)
-            elif lm == 'distilbert':
-                self.bert = DistilBertModel.from_pretrained(model_ckpts[lm],
-                        state_dict=model_state_dict)
-            elif lm == 'albert':
-                self.bert = AlbertModel.from_pretrained(model_ckpts[lm],
-                        state_dict=model_state_dict)
-            elif lm == 'xlnet':
-                self.bert = XLNetModel.from_pretrained(model_ckpts[lm],
-                        state_dict=model_state_dict)
-            elif lm == 'roberta':
-                self.bert = RobertaModel.from_pretrained(model_ckpts[lm],
-                        state_dict=model_state_dict)
-            elif lm == 'ernie':
-                self.bert = AutoModel.from_pretrained(model_ckpts[lm],
-                        state_dict=model_state_dict)
+            if lm == 'bert-mini':
+                self.bert = BertModel.from_pretrained(bert_path)
+            else:
+                output_model_file = bert_path
+                model_state_dict = torch.load(output_model_file,
+                                              map_location=lambda storage, loc: storage)
+                if lm == 'bert':
+                    self.bert = BertModel.from_pretrained(model_ckpts[lm],
+                            state_dict=model_state_dict)
+                elif lm == 'distilbert':
+                    self.bert = DistilBertModel.from_pretrained(model_ckpts[lm],
+                            state_dict=model_state_dict)
+                elif lm == 'albert':
+                    self.bert = AlbertModel.from_pretrained(model_ckpts[lm],
+                            state_dict=model_state_dict)
+                elif lm == 'xlnet':
+                    self.bert = XLNetModel.from_pretrained(model_ckpts[lm],
+                            state_dict=model_state_dict)
+                elif lm == 'roberta':
+                    self.bert = RobertaModel.from_pretrained(model_ckpts[lm],
+                            state_dict=model_state_dict)
+                elif lm == 'ernie':
+                    self.bert = AutoModel.from_pretrained(model_ckpts[lm],
+                            state_dict=model_state_dict)
+                elif lm == 'bert-tiny':
+                    self.bert = BertModel.from_pretrained(model_ckpts[lm],
+                            state_dict=model_state_dict)
+
 
         self.device = device
         self.finetuning = finetuning
@@ -66,7 +74,7 @@ class MultiTaskNet(nn.Module):
         self.module_dict = nn.ModuleDict({})
 
         # hard corded for now
-        hidden_size = 768
+        hidden_size = 256
         hidden_dropout_prob = 0.1
 
         for config in task_configs:
