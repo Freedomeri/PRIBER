@@ -381,6 +381,8 @@ class CrypTensor(object, metaclass=CrypTensorMetaclass):
                     args = [self] + list(args)
 
                 # apply correct autograd function:
+                #if name == 'permute':
+
                 result = grad_fn.forward(ctx, *args, **kwargs)
 
                 # output may be tensor or tuple
