@@ -74,7 +74,7 @@ class MultiTaskNet(nn.Module):
         self.module_dict = nn.ModuleDict({})
 
         # hard corded for now
-        hidden_size = 256
+        hidden_size = 768
         hidden_dropout_prob = 0.1
 
         for config in task_configs:

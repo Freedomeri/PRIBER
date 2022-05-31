@@ -24,6 +24,9 @@ from ditto.dataset import DittoDataset
 from ditto.summarize import Summarizer
 from ditto.knowledge import *
 
+import crypten
+crypten.init()
+
 def to_str(row, summarizer=None, max_len=256, dk_injector=None):
     """Serialize a data entry
 
@@ -83,8 +86,15 @@ def classify(sentence_pairs, config, model, lm='distilbert', max_len=256):
             words, x, is_heads, tags, mask, y, seqlens, taskname = batch
             taskname = taskname[0]
             logits, _, y_hat = model(x, y, task=taskname)  # y_hat: (N, T)
-            Y_logits += logits.cpu().numpy().tolist()
-            Y_hat.extend(y_hat.cpu().numpy().tolist())
+            if type(logits) == crypten.mpc.mpc.MPCTensor:
+                Y_logits += logits.cpu().share.numpy().tolist()
+                Y_hat.extend(y_hat.cpu().share.numpy().tolist())
+            else:
+                Y_logits += logits.cpu().numpy().tolist()
+                Y_hat.extend(y_hat.cpu().numpy().tolist())
+
+
+
 
     results = []
     for i in range(len(inputs)):
@@ -188,7 +198,7 @@ def load_model(task, path, lm, use_gpu, fp16=True):
 
     config = configs[task]
     config_list = [config]
-    model = MultiTaskNet([config], device, True, lm=lm)
+    model = MultiTaskNet([config], device, False, lm=lm)
 
     saved_state = torch.load(checkpoint, map_location=lambda storage, loc: storage)
     model.load_state_dict(saved_state)
