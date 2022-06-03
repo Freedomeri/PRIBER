@@ -89,6 +89,7 @@ def classify(sentence_pairs, config, model, lm='distilbert', max_len=256):
             if type(logits) == crypten.mpc.mpc.MPCTensor:
                 Y_logits += logits.cpu().share.numpy().tolist()
                 Y_hat.extend(y_hat.cpu().share.numpy().tolist())
+                Y_hat = [np.argmax(item) for item in Y_hat]
             else:
                 Y_logits += logits.cpu().numpy().tolist()
                 Y_hat.extend(y_hat.cpu().numpy().tolist())
@@ -184,7 +185,9 @@ def load_model(task, path, lm, use_gpu, fp16=True):
         MultiTaskNet: the model
     """
     # load models
-    checkpoint = os.path.join(path, '%s.pt' % task)
+    #checkpoint = os.path.join(path, '%s.pt' % task)
+    checkpoint = os.path.join(path, 'pytorch_model.bin')
+
     if not os.path.exists(checkpoint):
         raise ModelNotFoundError(checkpoint)
 
@@ -198,7 +201,7 @@ def load_model(task, path, lm, use_gpu, fp16=True):
 
     config = configs[task]
     config_list = [config]
-    model = MultiTaskNet([config], device, False, lm=lm)
+    model = MultiTaskNet([config], device, False, lm=lm, bert_path = path)
 
     saved_state = torch.load(checkpoint, map_location=lambda storage, loc: storage)
     model.load_state_dict(saved_state)

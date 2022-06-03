@@ -315,15 +315,19 @@ class CrypTensor(object, metaclass=CrypTensorMetaclass):
             output = args[0].dropout(kwargs['p'],kwargs['training'])
             return output
         elif func.__name__ == 'layer_norm':
-            t_layer_norm = torch.nn.LayerNorm(args[1])
-            t_layer_norm = t_layer_norm.to(device=torch.device('cuda' if self.device.type == 'cuda' else 'cpu'))
-            t_output = t_layer_norm(args[0]._tensor.data.type(torch.float32))
-            args[0]._tensor.data = t_output.type(torch.int64)
-            return args[0]
+            # t_layer_norm = torch.nn.LayerNorm(args[1])
+            # t_layer_norm = t_layer_norm.to(device=torch.device('cuda' if self.device.type == 'cuda' else 'cpu'))
+            # t_output = t_layer_norm(args[0]._tensor.data.type(torch.float32))
+            # args[0]._tensor.data = t_output.type(torch.int64)
+            # return args[0]
+            output = args[0].layernorm(args[1],kwargs['weight'],kwargs['bias'],kwargs['eps'])
+            return output
         elif func.__name__ == 'gelu':
             return args[0].relu()
+        elif func.__name__ == 'relu':
+            return args[0].relu()
         elif func.__name__ == 'tanh':
-            return args[0].hardtanh(-1, 1)
+            return args[0].tanh()
         elif func.__name__ == 'cross_entropy':
             output1 = args[0].squeeze()
             output2 = args[1].squeeze()

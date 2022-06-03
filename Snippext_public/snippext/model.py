@@ -38,8 +38,14 @@ class MultiTaskNet(nn.Module):
                 self.bert = RobertaModel.from_pretrained(model_ckpts[lm])
             elif lm == 'ernie':
                 self.bert = AutoModel.from_pretrained(model_ckpts[lm])
+            elif lm == 'bert-tiny':
+                self.bert = BertModel.from_pretrained(model_ckpts[lm],output_hidden_states = True)
         else:
             if lm == 'bert-mini':
+                self.bert = BertModel.from_pretrained(bert_path)
+            if lm == 'bert-tiny':
+                self.bert = BertModel.from_pretrained(bert_path,output_hidden_states = True)
+            if lm == 'bert':
                 self.bert = BertModel.from_pretrained(bert_path)
             else:
                 output_model_file = bert_path
@@ -63,9 +69,9 @@ class MultiTaskNet(nn.Module):
                 elif lm == 'ernie':
                     self.bert = AutoModel.from_pretrained(model_ckpts[lm],
                             state_dict=model_state_dict)
-                elif lm == 'bert-tiny':
-                    self.bert = BertModel.from_pretrained(model_ckpts[lm],
-                            state_dict=model_state_dict)
+                # elif lm == 'bert-tiny':
+                #     self.bert = BertModel.from_pretrained(model_ckpts[lm],
+                #             state_dict=model_state_dict)
 
 
         self.device = device

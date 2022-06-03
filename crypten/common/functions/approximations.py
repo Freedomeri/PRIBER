@@ -7,6 +7,7 @@
 
 import math
 
+
 import crypten
 import torch
 from crypten.config import cfg
@@ -27,8 +28,13 @@ __all__ = [
     "erf",
     "softmax",
     "log_softmax",
+    "layernorm"
 ]
 
+def layernorm(self,dim,weight,bias,eps):
+    mean = self.mean(-1,keepdim = True)
+    std = self.var(-1,keepdim = True).sqrt()
+    return (self-mean).mul(weight) / (std + eps) + bias
 
 # Iterative methods:
 def exp(self):

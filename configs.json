@@ -208,6 +208,14 @@
   "testset": "data/er_magellan/Structured/Beer/test.txt"
   },
   {
+  "name": "Structured_Beer_Mini",
+  "task_type": "classification",
+  "vocab": ["0", "1"],
+  "trainset": "data/er_magellan/Structured/Beer_Mini/train.txt",
+  "validset": "data/er_magellan/Structured/Beer_Mini/valid.txt",
+  "testset": "data/er_magellan/Structured/Beer_Mini/test.txt"
+  },
+  {
   "name": "Structured/DBLP-ACM",
   "task_type": "classification",
   "vocab": ["0", "1"],
