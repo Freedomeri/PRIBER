@@ -46,6 +46,9 @@ def get_tokenizer(lm='bert'):
         elif lm == 'bert-mini':
             from transformers import BertTokenizer
             tokenizer = BertTokenizer.from_pretrained('prajjwal1/bert-mini')
+        elif lm == 'bert-medium':
+            from transformers import BertTokenizer
+            tokenizer = BertTokenizer.from_pretrained('prajjwal1/bert-medium')
     return tokenizer
 
 

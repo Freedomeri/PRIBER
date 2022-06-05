@@ -43,10 +43,12 @@ class MultiTaskNet(nn.Module):
         else:
             if lm == 'bert-mini':
                 self.bert = BertModel.from_pretrained(bert_path)
-            if lm == 'bert-tiny':
+            elif lm == 'bert-tiny':
                 self.bert = BertModel.from_pretrained(bert_path,output_hidden_states = True)
-            if lm == 'bert':
-                self.bert = BertModel.from_pretrained(bert_path)
+            elif lm == 'bert':
+                self.bert = BertModel.from_pretrained(bert_path, output_hidden_states = True)
+            elif lm == 'bert-medium':
+                self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
             else:
                 output_model_file = bert_path
                 model_state_dict = torch.load(output_model_file,

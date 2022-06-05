@@ -28,8 +28,19 @@ __all__ = [
     "erf",
     "softmax",
     "log_softmax",
-    "layernorm"
+    "layernorm",
+    "gelu"
 ]
+
+sqrt2ofpi = math.sqrt(2 / math.pi)
+tempofgelu = 0.0455399241225
+
+def gelu(self):
+    # temp = self + tempofgelu
+    # temp = temp * sqrt2ofpi
+    # result = 1/2 * (temp.tanh() + 1)
+    result = self.mul(sigmoid(self.mul(1.702)))
+    return result
 
 def layernorm(self,dim,weight,bias,eps):
     mean = self.mean(-1,keepdim = True)
