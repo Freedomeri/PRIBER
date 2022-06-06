@@ -323,7 +323,7 @@ class CrypTensor(object, metaclass=CrypTensorMetaclass):
             output = args[0].layernorm(args[1],kwargs['weight'],kwargs['bias'],kwargs['eps'])
             return output
         elif func.__name__ == 'gelu':
-            return args[0].relu()
+            return args[0].gelu()
         elif func.__name__ == 'relu':
             return args[0].relu()
         elif func.__name__ == 'tanh':

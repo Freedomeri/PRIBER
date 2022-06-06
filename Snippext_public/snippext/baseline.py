@@ -73,19 +73,19 @@ def train(model, train_set, optimizer, scheduler=None, batch_size=32, fp16=False
             scheduler.step()
 
         if i == 0:
-            print("=====sanity check======")
-            print("words:", words[0])
-            print("x:", x.cpu().numpy()[0][:seqlens[0]])
-            print("tokens:", get_tokenizer().convert_ids_to_tokens(x.cpu().numpy()[0])[:seqlens[0]])
-            print("is_heads:", is_heads[0])
-            y_sample = _y.cpu().numpy()[0]
-            if np.isscalar(y_sample):
-                print("y:", y_sample)
-            else:
-                print("y:", y_sample[:seqlens[0]])
-            print("tags:", tags[0])
-            print("mask:", mask[0])
-            print("seqlen:", seqlens[0])
+            # print("=====sanity check======")
+            # print("words:", words[0])
+            # print("x:", x.cpu().numpy()[0][:seqlens[0]])
+            # print("tokens:", get_tokenizer().convert_ids_to_tokens(x.cpu().numpy()[0])[:seqlens[0]])
+            # print("is_heads:", is_heads[0])
+            # y_sample = _y.cpu().numpy()[0]
+            # if np.isscalar(y_sample):
+            #     print("y:", y_sample)
+            # else:
+            #     print("y:", y_sample[:seqlens[0]])
+            # print("tags:", tags[0])
+            # print("mask:", mask[0])
+            # print("seqlen:", seqlens[0])
             print("task_name:", taskname)
             print("=======================")
 
