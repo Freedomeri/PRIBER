@@ -85,3 +85,8 @@ Structured_Beer_lm=bert_dk=False_su=False 320.559353
 Structured_Beer_lm=bert_dk=False_su=False 216.935637
 Structured_Beer_lm=bert_dk=False_su=False 2.932658
 Structured_Beer_lm=bert_dk=False_su=False 7143.799981
+Structured_Beer_lm=bert-small_dk=False_su=False 125.063763
+Structured_Beer_lm=bert-small_dk=False_su=False 2.935887
+Structured_Beer_lm=bert-small_dk=False_su=False 342.144366
+Structured_Beer_lm=bert-small_dk=False_su=False 10113.364996
+Structured_Beer_lm=bert-small_dk=False_su=False 2.930614

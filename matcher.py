@@ -88,8 +88,8 @@ def classify(sentence_pairs, config, model, lm='distilbert', max_len=256):
             logits, _, y_hat = model(x, y, task=taskname)  # y_hat: (N, T)
             if type(logits) == crypten.mpc.mpc.MPCTensor:
                 Y_logits += logits.cpu().share.numpy().tolist()
-                Y_hat.extend(y_hat.cpu().share.numpy().tolist())
-                Y_hat = [np.argmax(item) for item in Y_hat]
+                y_temp = [np.argmax(item) for item in y_hat.cpu().share.numpy().tolist()]
+                Y_hat.extend(y_temp)
             else:
                 Y_logits += logits.cpu().numpy().tolist()
                 Y_hat.extend(y_hat.cpu().numpy().tolist())
