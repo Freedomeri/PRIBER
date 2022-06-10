@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from transformers import BertModel, AlbertModel, DistilBertModel, RobertaModel, XLNetModel, LongformerModel, AutoModel
+from MyBertModel import MyBERTModel
 
 model_ckpts = {'bert': "bert-base-uncased",
                'albert': "albert-base-v2",
@@ -9,7 +10,8 @@ model_ckpts = {'bert': "bert-base-uncased",
                'distilbert': "distilbert-base-uncased",
                'longformer': "allenai/longformer-base-4096",
                'ernie': "nghuyong/ernie-2.0-en",
-               'bert-tiny':"prajjwal1/bert-tiny"}
+               'bert-tiny':"prajjwal1/bert-tiny",
+               'bert-small':"prajjwal1/bert-small"}
 
 class MultiTaskNet(nn.Module):
     def __init__(self, task_configs=[],
@@ -40,6 +42,8 @@ class MultiTaskNet(nn.Module):
                 self.bert = AutoModel.from_pretrained(model_ckpts[lm])
             elif lm == 'bert-tiny':
                 self.bert = BertModel.from_pretrained(model_ckpts[lm],output_hidden_states = True)
+            elif lm == 'bert-small':
+                self.bert = MyBERTModel.from_pretrained(model_ckpts[lm], output_hidden_states=True)
         else:
             if lm == 'bert-mini':
                 self.bert = BertModel.from_pretrained(bert_path)
@@ -50,7 +54,8 @@ class MultiTaskNet(nn.Module):
             elif lm == 'bert-medium':
                 self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
             elif lm == 'bert-small':
-                self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
+                #self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
+                self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states=True)
             else:
                 output_model_file = bert_path
                 model_state_dict = torch.load(output_model_file,

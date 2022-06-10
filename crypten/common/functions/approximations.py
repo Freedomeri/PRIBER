@@ -32,14 +32,17 @@ __all__ = [
     "gelu"
 ]
 
-sqrt2ofpi = math.sqrt(2 / math.pi)
-tempofgelu = 0.0455399241225
 
 def gelu(self):
     # temp = self + tempofgelu
     # temp = temp * sqrt2ofpi
     # result = 1/2 * (temp.tanh() + 1)
+
     result = self.mul(sigmoid(self.mul(1.702)))
+
+    #result = self.mul(0.5).mul(1.0 + erf(self.div(math.sqrt(2.0))))
+
+    #result = self.mul(0.5).mul(1.0 + tanh(self.mul( 0.7978845608).mul(1.0 + self.mul(self))))
     return result
 
 def layernorm(self,dim,weight,bias,eps):

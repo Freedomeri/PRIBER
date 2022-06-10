@@ -26,6 +26,8 @@ from ditto.knowledge import *
 
 import crypten
 crypten.init()
+import MyBertModel
+
 
 def to_str(row, summarizer=None, max_len=256, dk_injector=None):
     """Serialize a data entry
@@ -77,6 +79,8 @@ def classify(sentence_pairs, config, model, lm='distilbert', max_len=256):
                                  num_workers=0,
                                  collate_fn=DittoDataset.pad)
 
+    embedding_matrix = torch.load("EmbeddingMatrix.pt")
+
     # prediction
     Y_logits = []
     Y_hat = []
@@ -85,6 +89,9 @@ def classify(sentence_pairs, config, model, lm='distilbert', max_len=256):
         for i, batch in enumerate(iterator):
             words, x, is_heads, tags, mask, y, seqlens, taskname = batch
             taskname = taskname[0]
+            embedded_x = torch.embedding(embedding_matrix,x)
+            embedded_x = crypten.cryptensor(embedded_x.type(torch.float32))
+            #logits, _, y_hat = model(embedded_x, y, task=taskname)  # y_hat: (N, T)
             logits, _, y_hat = model(x, y, task=taskname)  # y_hat: (N, T)
             if type(logits) == crypten.mpc.mpc.MPCTensor:
                 Y_logits += logits.cpu().share.numpy().tolist()
@@ -204,6 +211,9 @@ def load_model(task, path, lm, use_gpu, fp16=True):
     model = MultiTaskNet([config], device, False, lm=lm, bert_path = path)
 
     saved_state = torch.load(checkpoint, map_location=lambda storage, loc: storage)
+
+
+
     model.load_state_dict(saved_state)
 
 

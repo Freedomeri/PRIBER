@@ -26,6 +26,7 @@ import torch.utils.checkpoint
 from torch import nn
 from torch.nn import CrossEntropyLoss, MSELoss
 
+import crypten
 from .activations import gelu, gelu_new, swish
 from .configuration_bert import BertConfig
 from .file_utils import add_code_sample_docstrings, add_start_docstrings, add_start_docstrings_to_callable
@@ -185,9 +186,9 @@ class BertEmbeddings(nn.Module):
         '''
         test crypten embedding 2022.0418
         '''
-        import crypten
+        #import crypten
 
-        embeddings = crypten.cryptensor(embeddings.type(torch.float32))
+        #embeddings = crypten.cryptensor(embeddings.type(torch.float32))
         '''
         test not use MPCTensor but its value
         '''
