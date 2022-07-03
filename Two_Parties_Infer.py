@@ -47,7 +47,6 @@ def to_str(row, summarizer=None, max_len=256, dk_injector=None):
 
     return content
 
-
 def load_model(task, saved_state, lm, use_gpu, fp16=False,path = None):
     """Load a model for a specific task.
 
@@ -86,8 +85,6 @@ def load_model(task, saved_state, lm, use_gpu, fp16=False,path = None):
 
     return config, model
 
-
-
 def load_dataset(input_path,config,max_len = 128,summarizer=None,dk_injector=None):
     # input_path can also be train/valid/test.txt
     # convert to jsonlines
@@ -120,9 +117,9 @@ if __name__ == "__main__":
     '''static configs'''
     use_gpu = False
     lm = 'bert-small'
-    task = 'Structured_Beer'
-    max_len = 128
-    model_path = "/home/smz/models/bert-small-finetuned"
+    task = 'wdc_all_small'
+    max_len = 124
+    model_path = "/home/smz/models/bert-small-finetuned-wdcs"
 
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = MyBertModel.SplitModel(model_path)
@@ -131,7 +128,7 @@ if __name__ == "__main__":
     taskConfig,serverModel = load_model(task,saved_state,lm,use_gpu,path = model_path)
 
     '''load client dataset'''
-    dataPairs,dataRows = load_dataset('input/input_beer.txt',taskConfig,max_len=max_len)
+    dataPairs,dataRows = load_dataset('input/input_wdc_all_200.txt',taskConfig,max_len=max_len)
     inputs = []
     for (sentA, sentB) in dataPairs:
         inputs.append(sentA + '\t' + sentB)
@@ -154,12 +151,15 @@ if __name__ == "__main__":
 
     print(len(input_embeddings))
     '''divide into 2 parts(for test)'''
-    temp1 = input_embeddings[0][:64]
-    temp2 = input_embeddings[0][64:]
-    yTemp1 = Y[0][:64]
-    yTemp2 = Y[0][64:]
-    input_embeddings[0] = temp1
-    input_embeddings.append(temp2)
+    # temp1 = input_embeddings[0][:64]
+    # temp2 = input_embeddings[0][64:]
+    # yTemp1 = Y[0][:64]
+    # yTemp2 = Y[0][64:]
+    # input_embeddings[0] = temp1
+    # input_embeddings.append(temp2)
+    yTemp1 = Y[0]
+    yTemp2 = Y[1]
+
 
     '''encrypt and process for 2 parties'''
     from crypten import mpc
