@@ -112,12 +112,13 @@ class MultiTaskNet(nn.Module):
             self.module_dict['%s_fc' % name] = nn.Linear(hidden_size, vocab_size)
 
 
-    def forward(self, x, y,
+    def forward(self, x,
+                y=None,
                 augment_batch=None,
                 aug_enc=None,
                 second_batch=None,
                 x_enc=None,
-                task='hotel_tagging',
+                task='wdc_all_small',
                 get_enc=False):
         """Forward function of the BERT models for classification/tagging.
 
@@ -136,10 +137,15 @@ class MultiTaskNet(nn.Module):
             Tensor: yhat
             Tensor (optional): enc"""
 
+        #init y if None
+        if y is None:
+            y = torch.zeros(x.size(0))
+
+
         # move input to GPU
         x = x.to(self.device)
         y = y.to(self.device)
-        if second_batch != None:
+        if second_batch is not None:
             index, lam = second_batch
             lam = torch.tensor(lam).to(self.device)
         if augment_batch != None:
@@ -209,8 +215,10 @@ class MultiTaskNet(nn.Module):
             if 'sts-b' in task:
                 y_hat = logits
             else:
-                y_hat = logits.argmax(-1)
+                #y_hat = logits.argmax(-1)
+                y_hat = logits
             if get_enc:
                 return logits, y, y_hat, pooled_output
             else:
-                return logits, y, y_hat
+                #return logits, y, y_hat
+                return y_hat

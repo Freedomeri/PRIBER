@@ -118,24 +118,29 @@ if __name__ == "__main__":
     use_gpu = False
     lm = 'bert-small'
     task = 'wdc_all_small'
-    max_len = 124
-    model_path = "/home/smz/models/bert-small-finetuned-wdcs"
+    max_len = 128
+    model_path = "/home/smz/models/bert-small-finetuned-wdcs2"
 
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = MyBertModel.SplitModel(model_path)
 
     '''load server model'''
     taskConfig,serverModel = load_model(task,saved_state,lm,use_gpu,path = model_path)
+    #saved_model_path = os.path.join(os.getcwd(),'models','serverModel','pytorch_model.bin')
+    #serverModel.save_pretrained(saved_model_path)
+    #torch.save(serverModel,saved_model_path)
+    #encrypted_model = crypten.nn.from_pytorch(torch.load(saved_model_path),torch.empty(1,128,512),transformers=False)
+    #encrypted_model.encrypt(src=ALICE)
 
     '''load client dataset'''
-    dataPairs,dataRows = load_dataset('input/input_wdc_all_200.txt',taskConfig,max_len=max_len)
+    dataPairs,dataRows = load_dataset('input/input_wdc_all_100.txt',taskConfig,max_len=max_len)
     inputs = []
     for (sentA, sentB) in dataPairs:
         inputs.append(sentA + '\t' + sentB)
 
     dataset = DittoDataset(inputs, taskConfig['vocab'], taskConfig['name'], lm=lm, max_len=max_len)
     iterator = data.DataLoader(dataset=dataset,
-                               batch_size=128,
+                               batch_size=256,
                                shuffle=False,
                                num_workers=0,
                                collate_fn=DittoDataset.pad)
@@ -146,19 +151,19 @@ if __name__ == "__main__":
         for i, batch in enumerate(iterator):
             words, x, is_heads, tags, mask, y, seqlens, taskname = batch
             taskname = taskname[0]
-            input_embeddings.append(MyBertModel._BertEmbedding(x, BertEmbeds,hidden_size=512))
+            input_embeddings.append(MyBertModel.Embedding(x, BertEmbeds, hidden_size=512))
             Y.append(y)
 
     print(len(input_embeddings))
     '''divide into 2 parts(for test)'''
-    # temp1 = input_embeddings[0][:64]
-    # temp2 = input_embeddings[0][64:]
-    # yTemp1 = Y[0][:64]
-    # yTemp2 = Y[0][64:]
-    # input_embeddings[0] = temp1
-    # input_embeddings.append(temp2)
-    yTemp1 = Y[0]
-    yTemp2 = Y[1]
+    temp1 = input_embeddings[0][:75]
+    temp2 = input_embeddings[0][75:]
+    yTemp1 = Y[0][:75]
+    yTemp2 = Y[0][75:]
+    input_embeddings[0] = temp1
+    input_embeddings.append(temp2)
+    # yTemp1 = Y[0]
+    # yTemp2 = Y[1]
 
 
     '''encrypt and process for 2 parties'''
@@ -185,10 +190,11 @@ if __name__ == "__main__":
 
         # Concatenate features
         samples_enc = crypten.cat([samples_alice_enc, samples_bob_enc], dim=0)
-        Y_logits = []
+        #Y_logits = []
         Y_hat = []
-        logits, _, y_hat = serverModel(samples_enc, yTemp1, task=task)  # y_hat: (N, T)
-        Y_logits += logits.get_plain_text().numpy().tolist()
+        #logits, _, y_hat = serverModel(samples_enc, yTemp1, task=task)  # y_hat: (N, T)
+        y_hat = serverModel(samples_enc, yTemp1, task=task)  # y_hat: (N, T)
+        #Y_logits += logits.get_plain_text().numpy().tolist()
         y_temp = [np.argmax(item) for item in y_hat.get_plain_text().numpy().tolist()]
         Y_hat.extend(y_temp)
         crypten.print(f"predict:{Y_hat}")

@@ -114,7 +114,7 @@ class MyBERTModel(mb.BertPreTrainedModel):
         ]  # add hidden_states and attentions if they are here
         return outputs  # sequence_output, pooled_output, (hidden_states), (attentions)
 
-def SplitModel(path):
+def splitModel(path):
     path = os.path.join(path, 'pytorch_model.bin')
     if not os.path.exists(path):
         raise ModelNotFoundError(path)
@@ -128,7 +128,7 @@ def SplitModel(path):
     return BertEmbeds, saved_state
 
 
-def _BertEmbedding(input_ids,BertEmbeds,position_ids = None, token_type_ids = None, inputs_embeds = None,hidden_size = 512):
+def embedding(input_ids, BertEmbeds, position_ids = None, token_type_ids = None, inputs_embeds = None, hidden_size = 512):
     if input_ids is not None:
         input_shape = input_ids.size()
     else:

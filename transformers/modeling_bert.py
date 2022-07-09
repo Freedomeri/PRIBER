@@ -186,7 +186,7 @@ class BertEmbeddings(nn.Module):
         '''
         test crypten embedding 2022.0418
         '''
-        #import crypten
+        import crypten
 
         #embeddings = crypten.cryptensor(embeddings.type(torch.float32))
         '''

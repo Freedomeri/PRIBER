@@ -1758,6 +1758,22 @@ class Gemm(Module):
         )
 
 
+"""
+2022/07/07 by SUN
+Add new modules
+"""
+class ArgMax(Module):
+    def __init__(self,dim):
+        super().__init__()
+        self.dim = dim
+
+    def forward(self, x, **kwargs):
+        return x.argmax(self.dim, kwargs)
+
+    @staticmethod
+    def from_onnx(attributes=None):
+        return ArgMax
+
 class Linear(Module):
     """
     Module that performs linear transformation.

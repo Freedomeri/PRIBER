@@ -45,13 +45,15 @@ def from_pytorch(pytorch_model, dummy_input, transformers=False):
     Converts a PyTorch model `pytorch_model` into a CrypTen model by tracing it
     using the input `dummy_input`.
     """
+    #onnxPath = os.path.join(pytorch_model,'saved_model.onnx')
+    #pthPath = os.path.join(pytorch_model, 'saved_model.pth')
     if transformers == False:
          # construct CrypTen model:
         f = _from_pytorch_to_bytes(pytorch_model, dummy_input)
-    else:
-        if os.path.exists("onnx/model.onnx") == False:
-            convert(framework="pt", model="bert-base-uncased", output=Path("onnx/model.onnx"), opset=11)
-        f = onnx._load_bytes("onnx/model.onnx")
+    #else:
+        # if not os.path.exists(onnxPath):
+        #     convert(framework="pt", model=pytorch_model, output=Path(onnxPath), opset=11)
+        # f = onnx._load_bytes(onnxPath)
     crypten_model = from_onnx(f)
     #f.close()
 
@@ -163,7 +165,7 @@ def _to_crypten(onnx_model):
 
     # create graph:
     input_names, output_names = _get_input_output_names(onnx_model)
-    output_names=[output_names]
+    #output_names=[output_names]
     assert len(output_names) == 1, "Only one output per model supported."
     crypten_model = module.Graph(input_names, output_names[0])
 
@@ -171,14 +173,14 @@ def _to_crypten(onnx_model):
     for node in onnx_model.graph.initializer:
         param = torch.from_numpy(numpy_helper.to_array(node)).float()
         crypten_model.add_module(node.name, module.Parameter(param), [])
-    i = 1
+    #i = 1
     # loop over all nodes:
     for node in onnx_model.graph.node:
 
         # get attributes and node type:
         attributes = {attr.name: _get_attribute_value(attr) for attr in node.attribute}
         crypten_class = _get_operator_class(node.op_type, attributes)
-        i=i+1
+        #i=i+1
         #print(i)
         # add CrypTen module to graph:
         crypten_module = crypten_class.from_onnx(attributes=attributes)
@@ -213,8 +215,8 @@ def _get_input_output_names(onnx_model):
     output_names = [output.name for output in onnx_model.graph.output]
     print(output_names)
     assert len(input_names) >= 1, "number of inputs should be at least 1"
-    #assert len(output_names) == 1, "number of outputs should be 1"
-    return input_names, output_names[0]
+    assert len(output_names) == 1, "number of outputs should be 1"
+    return input_names, output_names
 
 
 def _get_model_or_module(crypten_model):
