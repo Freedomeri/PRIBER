@@ -176,7 +176,8 @@ if __name__ == "__main__":
     lm = 'bert-small'
     task = 'wdc_all_small'
     max_len = 128
-    model_path = "/home/smz/models/bert-small-finetuned-wdcs2"
+    model_path = '/home/smz/models/bert-small-finetuned-wdcs2'
+    input_path = 'input/input_wdc_all_10.txt'
 
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = splitModel(model_path)
@@ -190,7 +191,7 @@ if __name__ == "__main__":
 
 
     '''load client dataset'''
-    dataPairs,dataRows = load_dataset('input/input_wdc_all_100.txt',taskConfig,max_len=max_len)
+    dataPairs,dataRows = load_dataset(input_path,taskConfig,max_len=max_len)
     inputs = []
     for (sentA, sentB) in dataPairs:
         inputs.append(sentA + '\t' + sentB)
@@ -246,27 +247,45 @@ if __name__ == "__main__":
         crypten.print("Model successfully encrypted:", encrypted_model.encrypted)
 
 
-    # @mpc.run_multiprocess(world_size=2)
-    # def encryptAndInference():
-    #     ''' Alice loads model, Bob loads samples'''
-    #     #samples_alice_enc = crypten.load_from_party("encrypted_data/samples_alice.pt", src=ALICE)
-    #     samples_enc = crypten.load_from_party("encrypted_data/samples_bob.pt", src=BOB)
-    #     encrypted_model.eval()
-    #
-    #     rank = comm.get().get_rank()
-    #     #crypten.print(f"Rank {rank}: {samples_alice_enc}", in_order=True)
-    #
-    #     # Concatenate features
-    #     #samples_enc = crypten.cat([samples_alice_enc, samples_bob_enc], dim=0)
-    #     #Y_logits = []
-    #     Y_hat = []
-    #     #logits, _, y_hat = serverModel(samples_enc, yTemp1, task=task)  # y_hat: (N, T)
-    #     y_hat = encrypted_model(samples_enc, Y[0], task=task)  # y_hat: (N, T)
-    #     #Y_logits += logits.get_plain_text().numpy().tolist()
-    #     #y_temp = [np.argmax(item) for item in y_hat.get_plain_text().numpy().tolist()]
-    #     #Y_hat.extend(y_temp)
-    #     Y_hat.extend(y_hat)
-    #     crypten.print(f"predict:{Y_hat}")
+    #@mpc.run_multiprocess(world_size=2)
+    #def encryptAndInference():
+        ''' Alice loads model, Bob loads samples'''
+        #samples_alice_enc = crypten.load_from_party("encrypted_data/samples_alice.pt", src=ALICE)
+        samples_enc = crypten.load_from_party("encrypted_data/samples_bob.pt", src=BOB)
+        encrypted_model.eval()
 
-    saveData(input_embeddings)
+        rank = comm.get().get_rank()
+        #crypten.print(f"Rank {rank}: {samples_alice_enc}", in_order=True)
+
+        # Concatenate features
+        #samples_enc = crypten.cat([samples_alice_enc, samples_bob_enc], dim=0)
+        #Y_logits = []
+        Y_hat = []
+        #logits, _, y_hat = serverModel(samples_enc, yTemp1, task=task)  # y_hat: (N, T)
+        #y_hat = encrypted_model(samples_enc, Y[0], task=task)  # y_hat: (N, T)
+        y_hat = encrypted_model(samples_enc)  # y_hat: (N, T)
+        #Y_logits += logits.get_plain_text().numpy().tolist()
+        #y_temp = [np.argmax(item) for item in y_hat.get_plain_text().numpy().tolist()]
+        #Y_hat.extend(y_temp)
+        y_hat = y_hat.argmax(-1).get_plain_text().numpy().tolist()
+        Y_hat.extend(y_hat)
+        crypten.print(f"predict:{Y_hat}")
+
+    def testOneParty(input_embeddings):
+        samples_test = crypten.cryptensor(input_embeddings[0])
+        plaintext_model = torch.load(saved_model_path)
+        encrypted_model = crypten.nn.from_pytorch(plaintext_model, torch.empty((1, 128, 512)),
+                                                  transformers=False)
+        encrypted_model.eval()
+        encrypted_model.encrypt()
+        crypten.print("Model successfully encrypted:", encrypted_model.encrypted)
+        y_hat = encrypted_model(samples_test)  # y_hat: (N, T)
+        y_hat = y_hat.argmax(-1)
+        Y_hat = [np.argmax(item) for item in y_hat.get_plain_text().numpy().tolist()]
+        crypten.print(f"predict:{Y_hat}")
+
+
+    testOneParty(input_embeddings)
+
+    #saveData(input_embeddings)
     #encryptAndInference()

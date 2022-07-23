@@ -45,8 +45,6 @@ def from_pytorch(pytorch_model, dummy_input, transformers=False):
     Converts a PyTorch model `pytorch_model` into a CrypTen model by tracing it
     using the input `dummy_input`.
     """
-    #onnxPath = os.path.join(pytorch_model,'saved_model.onnx')
-    #pthPath = os.path.join(pytorch_model, 'saved_model.pth')
     if transformers == False:
          # construct CrypTen model:
         f = _from_pytorch_to_bytes(pytorch_model, dummy_input)

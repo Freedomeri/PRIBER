@@ -69,6 +69,12 @@ def exp(self):
     result = 1 + self.div(2 ** iters)
     for _ in range(iters):
         result = result.square()
+    # x2 = self*self
+    # x6 = self.mul(6)
+    # numer = 12+x6+x2
+    # denom = 12-x6+x2
+    # result = numer/denom
+
     return result
 
 
