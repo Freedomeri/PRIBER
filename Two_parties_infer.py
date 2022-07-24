@@ -176,7 +176,7 @@ if __name__ == "__main__":
     lm = 'bert-small'
     task = 'wdc_all_small'
     max_len = 128
-    model_path = '/home/smz/models/bert-small-finetuned-wdcs2'
+    model_path = "/home/smz/models/bert-small-finetuned-wdcs2"
     input_path = 'input/input_wdc_all_10.txt'
 
     '''Split saved Parameters into embeddings and main model params'''

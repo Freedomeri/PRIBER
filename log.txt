@@ -199,3 +199,13 @@ wdc_all_small_lm=bert-small_dk=False_su=False 0.001882
 wdc_all_small_lm=bert-small_dk=False_su=False 0.001837
 wdc_all_small_lm=bert-small_dk=False_su=False 0.001675
 wdc_all_small_lm=bert-small_dk=False_su=False 0.002031
+wdc_all_small_lm=bert-small_dk=False_su=False 0.003007
+wdc_all_small_lm=bert-small_dk=False_su=False 0.003929
+wdc_all_small_lm=bert-small_dk=False_su=False 0.003315
+wdc_all_small_lm=bert-small_dk=False_su=False 0.001166
+wdc_all_small_lm=bert-small_dk=False_su=False 0.003310
+wdc_all_small_lm=bert-small_dk=False_su=False 0.003787
+wdc_all_small_lm=bert-small_dk=False_su=False 0.003440
+wdc_all_small_lm=bert-small_dk=False_su=False 0.001223
+wdc_all_small_lm=bert-small_dk=False_su=False 0.003539
+wdc_all_small_lm=bert-small_dk=False_su=False 0.002614

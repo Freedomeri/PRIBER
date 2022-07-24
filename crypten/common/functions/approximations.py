@@ -31,7 +31,7 @@ __all__ = [
     "layernorm",
     "gelu"
 ]
-
+#temp = 1.442695
 
 def gelu(self):
     # temp = self + tempofgelu
@@ -69,11 +69,14 @@ def exp(self):
     result = 1 + self.div(2 ** iters)
     for _ in range(iters):
         result = result.square()
-    # x2 = self*self
+    # x2 = self.square()
     # x6 = self.mul(6)
     # numer = 12+x6+x2
     # denom = 12-x6+x2
-    # result = numer/denom
+    # result = numer.div(denom)
+
+    # x = self.div(temp)
+    # result = pow(2,x)
 
     return result
 
@@ -373,6 +376,7 @@ def tanh(self):
 
     if method == "reciprocal":
         return self.mul(2).sigmoid().mul(2).sub(1)
+        #return self.mul(3).div(3-self.square())
     elif method == "chebyshev":
         terms = cfg.functions.sigmoid_tanh_terms
         coeffs = crypten.common.util.chebyshev_series(torch.tanh, 1, terms)[1::2]
