@@ -446,12 +446,22 @@ def softmax(self, dim, **kwargs):
     if self.size(dim) == 1:
         return self.new(torch.ones_like(self.data))
 
+    '''localize method'''
+    self = self.get_plain_text()
     maximum_value = self.max(dim, keepdim=True)[0]
     logits = self - maximum_value
-    numerator = logits.exp()
-    with cfg.temp_override({"functions.reciprocal_all_pos": True}):
-        inv_denominator = numerator.sum(dim, keepdim=True).reciprocal()
-    return numerator * inv_denominator
+    numerator = torch.exp(logits)
+    denominator = numerator.sum(dim, keepdim=True)
+    result = numerator / denominator
+    result = crypten.cryptensor(result)
+    return result
+
+    # maximum_value = self.max(dim, keepdim=True)[0]
+    # logits = self - maximum_value
+    # numerator = logits.exp()
+    # with cfg.temp_override({"functions.reciprocal_all_pos": True}):
+    #     inv_denominator = numerator.sum(dim, keepdim=True).reciprocal()
+    # return numerator * inv_denominator
 
 
 def log_softmax(self, dim, **kwargs):

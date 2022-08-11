@@ -209,3 +209,11 @@ wdc_all_small_lm=bert-small_dk=False_su=False 0.003440
 wdc_all_small_lm=bert-small_dk=False_su=False 0.001223
 wdc_all_small_lm=bert-small_dk=False_su=False 0.003539
 wdc_all_small_lm=bert-small_dk=False_su=False 0.002614
+wdc_all_small_lm=bert-small_dk=False_su=False 0.003050
+Structured_Beer_lm=bert_dk=False_su=False 0.007193
+Structured_Beer_lm=bert_dk=False_su=False 0.005658
+Structured_Beer_lm=bert_dk=False_su=False 0.006189
+Structured_Beer_lm=bert_dk=False_su=False 0.006767
+Structured_Beer_lm=bert_dk=False_su=False 0.005828
+Structured_Beer_lm=bert_dk=False_su=False 0.005950
+Structured_Beer_lm=bert_dk=False_su=False 0.002826

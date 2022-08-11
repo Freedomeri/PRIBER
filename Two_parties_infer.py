@@ -173,11 +173,12 @@ if __name__ == "__main__":
 
     '''static configs'''
     use_gpu = False
-    lm = 'bert-small'
-    task = 'wdc_all_small'
+    lm = 'bert'
+    task = 'Structured_Beer'
     max_len = 128
-    model_path = "/home/smz/models/bert-small-finetuned-wdcs2"
-    input_path = 'input/input_wdc_all_10.txt'
+    hidden_size = 768
+    model_path = "/home/smz/models/bert-finetuned"
+    input_path = 'input/input_beer_10.txt'
 
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = splitModel(model_path)
@@ -209,19 +210,11 @@ if __name__ == "__main__":
         for i, batch in enumerate(iterator):
             words, x, is_heads, tags, mask, y, seqlens, taskname = batch
             taskname = taskname[0]
-            input_embeddings.append(embedding(x, BertEmbeds, hidden_size=512))
+            input_embeddings.append(embedding(x, BertEmbeds, hidden_size=hidden_size))
             Y.append(y)
 
 
     '''divide into 2 parts(for test)'''
-    # temp1 = input_embeddings[0][:75]
-    # temp2 = input_embeddings[0][75:]
-    # yTemp1 = Y[0][:75]
-    # yTemp2 = Y[0][75:]
-    # input_embeddings[0] = temp1
-    # input_embeddings.append(temp2)
-    # yTemp1 = Y[0]
-    # yTemp2 = Y[1]
     samples_bob = input_embeddings[0]
 
     '''encrypt and process for 2 parties'''
@@ -240,7 +233,7 @@ if __name__ == "__main__":
 
         """encrypt model"""
         model = crypten.load_from_party(saved_model_path, model_class=MultiTaskNet, src=ALICE)
-        encrypted_model = crypten.nn.from_pytorch(model, torch.empty(1, 128, 512),
+        encrypted_model = crypten.nn.from_pytorch(model, torch.empty(1, 128, hidden_size),
                                                   transformers=False)
         encrypted_model.encrypt(src=ALICE)
         '''Check that model is encrypted:'''
@@ -274,7 +267,7 @@ if __name__ == "__main__":
     def testOneParty(input_embeddings):
         samples_test = crypten.cryptensor(input_embeddings[0])
         plaintext_model = torch.load(saved_model_path)
-        encrypted_model = crypten.nn.from_pytorch(plaintext_model, torch.empty((1, 128, 512)),
+        encrypted_model = crypten.nn.from_pytorch(plaintext_model, torch.empty((1, 128, hidden_size)),
                                                   transformers=False)
         encrypted_model.eval()
         encrypted_model.encrypt()
