@@ -15,7 +15,7 @@ model_ckpts = {'bert': "bert-base-uncased",
 
 class MultiTaskNet(nn.Module):
     def __init__(self, task_configs=[],
-                 device='cpu',
+                 device='cuda',
                  finetuning=True,
                  lm='bert',
                  bert_pt=None,
@@ -54,8 +54,8 @@ class MultiTaskNet(nn.Module):
             elif lm == 'bert-medium':
                 self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
             elif lm == 'bert-small':
-                #self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
-                self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states=True)
+                self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
+                #self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states=True)
             else:
                 output_model_file = bert_path
                 model_state_dict = torch.load(output_model_file,

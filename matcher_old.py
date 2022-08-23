@@ -87,19 +87,9 @@ def classify(sentence_pairs, config, model, lm='distilbert', max_len=256):
     with torch.no_grad():
         # print('Classification')
         for i, batch in enumerate(iterator):
-            words, x, is_heads, tags, mask, y, seqlens, taskname = batch
-            taskname = taskname[0]
-            embedded_x = torch.embedding(embedding_matrix,x)
-            embedded_x = crypten.cryptensor(embedded_x.type(torch.float32))
-            #logits, _, y_hat = model(embedded_x, y, task=taskname)  # y_hat: (N, T)
-            logits, _, y_hat = model(x, y, task=taskname)  # y_hat: (N, T)
-            if type(logits) == crypten.mpc.mpc.MPCTensor:
-                Y_logits += logits.cpu().share.numpy().tolist()
-                y_temp = [np.argmax(item) for item in y_hat.cpu().share.numpy().tolist()]
-                Y_hat.extend(y_temp)
-            else:
-                Y_logits += logits.cpu().numpy().tolist()
-                Y_hat.extend(y_hat.cpu().numpy().tolist())
+            x, _ = batch
+            logits = model(x)
+            probs = logits.softmax(dim=1)[:, 1]
 
 
 

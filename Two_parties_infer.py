@@ -172,7 +172,7 @@ if __name__ == "__main__":
     BOB = 1
 
     '''static configs'''
-    use_gpu = False
+    use_gpu = True
     lm = 'bert'
     task = 'Structured_Beer'
     max_len = 128
@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
     dataset = DittoDataset(inputs, taskConfig['vocab'], taskConfig['name'], lm=lm, max_len=max_len)
     iterator = data.DataLoader(dataset=dataset,
-                               batch_size=128,
+                               batch_size=len(dataset),
                                shuffle=False,
                                num_workers=0,
                                collate_fn=DittoDataset.pad)
@@ -208,8 +208,8 @@ if __name__ == "__main__":
     with torch.no_grad():
         # print('Classification')
         for i, batch in enumerate(iterator):
-            words, x, is_heads, tags, mask, y, seqlens, taskname = batch
-            taskname = taskname[0]
+            word, x, is_heads, tags, mask, y, seqlens, taskname = batch
+            #taskname = taskname[0]
             input_embeddings.append(embedding(x, BertEmbeds, hidden_size=hidden_size))
             Y.append(y)
 
@@ -266,12 +266,14 @@ if __name__ == "__main__":
 
     def testOneParty(input_embeddings):
         samples_test = crypten.cryptensor(input_embeddings[0])
+        samples_test = samples_test.to('cuda')
         plaintext_model = torch.load(saved_model_path)
         encrypted_model = crypten.nn.from_pytorch(plaintext_model, torch.empty((1, 128, hidden_size)),
                                                   transformers=False)
         encrypted_model.eval()
         encrypted_model.encrypt()
         crypten.print("Model successfully encrypted:", encrypted_model.encrypted)
+        encrypted_model.cuda()
         y_hat = encrypted_model(samples_test)  # y_hat: (N, T)
         y_hat = y_hat.argmax(-1)
         Y_hat = [np.argmax(item) for item in y_hat.get_plain_text().numpy().tolist()]
