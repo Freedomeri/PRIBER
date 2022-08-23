@@ -54,8 +54,8 @@ class MultiTaskNet(nn.Module):
             elif lm == 'bert-medium':
                 self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
             elif lm == 'bert-small':
-                self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
-                #self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states=True)
+                #self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
+                self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states=True)
             else:
                 output_model_file = bert_path
                 model_state_dict = torch.load(output_model_file,
@@ -89,7 +89,7 @@ class MultiTaskNet(nn.Module):
         self.module_dict = nn.ModuleDict({})
 
         # hard corded for now
-        hidden_size = 768
+        hidden_size = 512
         hidden_dropout_prob = 0.1
 
         for config in task_configs:
@@ -118,7 +118,7 @@ class MultiTaskNet(nn.Module):
                 aug_enc=None,
                 second_batch=None,
                 x_enc=None,
-                task='Structured_Beer',
+                task='wdc_all_small',
                 get_enc=False):
         """Forward function of the BERT models for classification/tagging.
 

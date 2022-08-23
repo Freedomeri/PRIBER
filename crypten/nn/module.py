@@ -963,6 +963,8 @@ class Add(Module):
     def forward(self, input):
         assert isinstance(input, (list, tuple)), "input must be list or tuple"
         assert len(input) == 2, "input must contain two tensors"
+        if input[1].device.type is 'cpu':
+            input[1] = input[1].cuda()
         return input[0].add(input[1])
 
     @staticmethod

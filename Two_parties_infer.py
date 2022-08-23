@@ -173,12 +173,12 @@ if __name__ == "__main__":
 
     '''static configs'''
     use_gpu = True
-    lm = 'bert'
-    task = 'Structured_Beer'
+    lm = 'bert-small'
+    task = 'wdc_all_small'
     max_len = 128
-    hidden_size = 768
-    model_path = "/home/smz/models/bert-finetuned"
-    input_path = 'input/input_beer_10.txt'
+    hidden_size = 512
+    model_path = "/home/smz/models/bert-small-finetuned-wdcs2"
+    input_path = 'input/input_wdc_all_10.txt'
 
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = splitModel(model_path)
@@ -266,14 +266,14 @@ if __name__ == "__main__":
 
     def testOneParty(input_embeddings):
         samples_test = crypten.cryptensor(input_embeddings[0])
-        samples_test = samples_test.to('cuda')
+        samples_test = samples_test.cuda()
         plaintext_model = torch.load(saved_model_path)
         encrypted_model = crypten.nn.from_pytorch(plaintext_model, torch.empty((1, 128, hidden_size)),
                                                   transformers=False)
         encrypted_model.eval()
         encrypted_model.encrypt()
         crypten.print("Model successfully encrypted:", encrypted_model.encrypted)
-        encrypted_model.cuda()
+        encrypted_model = encrypted_model.cuda()
         y_hat = encrypted_model(samples_test)  # y_hat: (N, T)
         y_hat = y_hat.argmax(-1)
         Y_hat = [np.argmax(item) for item in y_hat.get_plain_text().numpy().tolist()]
