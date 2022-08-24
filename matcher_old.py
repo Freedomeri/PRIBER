@@ -79,27 +79,36 @@ def classify(sentence_pairs, config, model, lm='distilbert', max_len=256):
                                  num_workers=0,
                                  collate_fn=DittoDataset.pad)
 
-    embedding_matrix = torch.load("EmbeddingMatrix.pt")
+    #embedding_matrix = torch.load("EmbeddingMatrix.pt")
 
     # prediction
     Y_logits = []
     Y_hat = []
+    # prediction
+    all_probs = []
+    all_logits = []
     with torch.no_grad():
         # print('Classification')
         for i, batch in enumerate(iterator):
-            x, _ = batch
+            word, x, is_heads, tags, mask, y, seqlens, taskname = batch
             logits = model(x)
             probs = logits.softmax(dim=1)[:, 1]
+            all_probs += probs.cpu().numpy().tolist()
+            all_logits += logits.cpu().numpy().tolist()
 
+        threshold = 0.5
 
-
-
-    results = []
-    for i in range(len(inputs)):
-        pred = dataset.idx2tag[Y_hat[i]]
-        results.append(pred)
-
-    return results, Y_logits
+    pred = [1 if p > threshold else 0 for p in all_probs]
+    return pred, all_logits
+    #
+    #
+    #
+    # results = []
+    # for i in range(len(inputs)):
+    #     pred = dataset.idx2tag[Y_hat[i]]
+    #     results.append(pred)
+    #
+    # return results, Y_logits
 
 def predict(input_path, output_path, config, model,
             batch_size=1024,

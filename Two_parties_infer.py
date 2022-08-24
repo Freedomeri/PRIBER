@@ -276,7 +276,7 @@ if __name__ == "__main__":
         encrypted_model = encrypted_model.cuda()
         y_hat = encrypted_model(samples_test)  # y_hat: (N, T)
         y_hat = y_hat.argmax(-1)
-        Y_hat = [np.argmax(item) for item in y_hat.get_plain_text().numpy().tolist()]
+        Y_hat = [np.argmax(item) for item in y_hat.get_plain_text().cpu().numpy().tolist()]
         crypten.print(f"predict:{Y_hat}")
 
 

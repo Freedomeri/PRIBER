@@ -50,7 +50,8 @@ class MultiTaskNet(nn.Module):
             elif lm == 'bert-tiny':
                 self.bert = BertModel.from_pretrained(bert_path,output_hidden_states = True)
             elif lm == 'bert':
-                self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states = True)
+                #self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states = True)
+                self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
             elif lm == 'bert-medium':
                 self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
             elif lm == 'bert-small':
