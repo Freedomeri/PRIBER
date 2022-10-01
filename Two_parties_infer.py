@@ -1,3 +1,4 @@
+import numpy
 from apex import amp
 import torch
 import numpy as np
@@ -9,6 +10,7 @@ import json
 import jsonlines
 import sys
 import time
+import timeit
 from tqdm import tqdm
 sys.path.insert(0, "Snippext_public")
 from torch.utils import data
@@ -19,9 +21,12 @@ from ditto.summarize import Summarizer
 from ditto.knowledge import *
 import os
 import MyBertModel
+import math
 import torch.nn.functional as nn
 import collections
-
+import logging
+logging.getLogger().setLevel(logging.INFO)
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 
 def to_str(row, summarizer=None, max_len=256, dk_injector=None):
     """Serialize a data entry
@@ -112,6 +117,13 @@ def load_dataset(input_path,config,max_len = 128,summarizer=None,dk_injector=Non
     os.system('echo %s %f >> log.txt' % (run_tag, run_time))
     return pairs,rows
 
+def write_results(rows, predictions, output_path):
+    with jsonlines.open(output_path, mode='w') as writer:
+        for row, pred in zip(rows, predictions):
+            output = {'pair': row,
+                'match': int(pred)}
+            writer.write(output)
+
 def embedding(input_ids, BertEmbeds, position_ids = None, token_type_ids = None, inputs_embeds = None, hidden_size = 512):
     if input_ids is not None:
         input_shape = input_ids.size()
@@ -131,9 +143,15 @@ def embedding(input_ids, BertEmbeds, position_ids = None, token_type_ids = None,
         inputs_embeds = nn.embedding(input_ids,BertEmbeds['bert.embeddings.word_embeddings.weight'])
     position_embeddings = nn.embedding(position_ids,BertEmbeds['bert.embeddings.position_embeddings.weight'])
     token_type_embeddings = nn.embedding(token_type_ids,BertEmbeds['bert.embeddings.token_type_embeddings.weight'])
-
+    #import matplotlib.pyplot as plt
     embeddings = inputs_embeds + position_embeddings + token_type_embeddings
+    # test1 = embeddings.flatten()
+    # plt.plot(test1)
+    # plt.show()
     embeddings = nn.layer_norm(embeddings,tuple(hidden_size),weight = BertEmbeds['bert.embeddings.LayerNorm.weight'], bias = BertEmbeds['bert.embeddings.LayerNorm.bias'],eps=1e-12)
+    # test2 = embeddings.flatten()
+    # plt.plot(test2)
+    # plt.show()
     embeddings = nn.dropout(embeddings,p = 0.1,training=False)
 
     return embeddings
@@ -163,6 +181,7 @@ def registerSafeClass():
     crypten.common.serial.register_safe_class(transformers.configuration_bert.BertConfig)
     crypten.common.serial.register_safe_class(transformers.modeling_bert.BertPooler)
     crypten.common.serial.register_safe_class(torch.nn.modules.container.ModuleDict)
+    crypten.common.serial.register_safe_class(transformers.activations.Activation)
 
 
 
@@ -172,13 +191,15 @@ if __name__ == "__main__":
     BOB = 1
 
     '''static configs'''
-    use_gpu = True
+    use_gpu = False
     lm = 'bert-small'
     task = 'wdc_all_small'
+    batch_size = 32
     max_len = 128
     hidden_size = 512
     model_path = "/home/smz/models/bert-small-finetuned-wdcs2"
     input_path = 'input/input_wdc_all_10.txt'
+    output_path = 'output/output_wdc_all_10.txt'
 
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = splitModel(model_path)
@@ -211,10 +232,11 @@ if __name__ == "__main__":
             word, x, is_heads, tags, mask, y, seqlens, taskname = batch
             #taskname = taskname[0]
             input_embeddings.append(embedding(x, BertEmbeds, hidden_size=hidden_size))
-            Y.append(y)
+            #Y.append(y)
 
 
-    '''divide into 2 parts(for test)'''
+    '''batch'''
+    batch_num = math.ceil(input_embeddings[0].__len__() / batch_size)
     samples_bob = input_embeddings[0]
 
     '''encrypt and process for 2 parties'''
@@ -224,12 +246,8 @@ if __name__ == "__main__":
 
     @mpc.run_multiprocess(world_size=2)
     def saveData(input_embeddings):
-        #samples_alice = input_embeddings[0]
-
         """encrypt data"""
-        #crypten.save_from_party(samples_alice, "encrypted_data/samples_alice.pt", src=ALICE)
         crypten.save_from_party(samples_bob, "encrypted_data/samples_bob.pt", src=BOB)
-
 
         """encrypt model"""
         model = crypten.load_from_party(saved_model_path, model_class=MultiTaskNet, src=ALICE)
@@ -239,48 +257,51 @@ if __name__ == "__main__":
         '''Check that model is encrypted:'''
         crypten.print("Model successfully encrypted:", encrypted_model.encrypted)
 
-
-    #@mpc.run_multiprocess(world_size=2)
-    #def encryptAndInference():
         ''' Alice loads model, Bob loads samples'''
         #samples_alice_enc = crypten.load_from_party("encrypted_data/samples_alice.pt", src=ALICE)
         samples_enc = crypten.load_from_party("encrypted_data/samples_bob.pt", src=BOB)
         encrypted_model.eval()
 
         rank = comm.get().get_rank()
-        #crypten.print(f"Rank {rank}: {samples_alice_enc}", in_order=True)
 
-        # Concatenate features
-        #samples_enc = crypten.cat([samples_alice_enc, samples_bob_enc], dim=0)
-        #Y_logits = []
         Y_hat = []
-        #logits, _, y_hat = serverModel(samples_enc, yTemp1, task=task)  # y_hat: (N, T)
-        #y_hat = encrypted_model(samples_enc, Y[0], task=task)  # y_hat: (N, T)
-        y_hat = encrypted_model(samples_enc)  # y_hat: (N, T)
-        #Y_logits += logits.get_plain_text().numpy().tolist()
-        #y_temp = [np.argmax(item) for item in y_hat.get_plain_text().numpy().tolist()]
-        #Y_hat.extend(y_temp)
-        y_hat = y_hat.argmax(-1).get_plain_text().numpy().tolist()
-        Y_hat.extend(y_hat)
-        crypten.print(f"predict:{Y_hat}")
+        for _batch in range(batch_num):
+            start, end = _batch * batch_size, (_batch + 1) * batch_size
+            if end > samples_enc.__len__():
+                end = samples_enc.__len__()
+            crypten.reset_communication_stats()
+            t_start = timeit.default_timer()
+            y_hat = encrypted_model(samples_enc[start:end])  # y_hat: (N, T)
+            t_end = timeit.default_timer()
+
+            crypten.print(f"Evaluation time:{t_end - t_start}")
+            y_hat = y_hat.argmax(-1).get_plain_text().cpu().numpy().tolist()
+            y_hat = [np.argmax(item) for item in y_hat]
+            Y_hat.extend(y_hat)
+            crypten.print(f"predict:{Y_hat}")
+            crypten.print_communication_stats()
+        return Y_hat
 
     def testOneParty(input_embeddings):
         samples_test = crypten.cryptensor(input_embeddings[0])
-        samples_test = samples_test.cuda()
+        samples_test = samples_test.cuda() if torch.cuda.is_available() else samples_test.cpu()
         plaintext_model = torch.load(saved_model_path)
         encrypted_model = crypten.nn.from_pytorch(plaintext_model, torch.empty((1, 128, hidden_size)),
                                                   transformers=False)
         encrypted_model.eval()
         encrypted_model.encrypt()
         crypten.print("Model successfully encrypted:", encrypted_model.encrypted)
-        encrypted_model = encrypted_model.cuda()
+        encrypted_model = encrypted_model.cuda() if torch.cuda.is_available() else encrypted_model.cpu()
         y_hat = encrypted_model(samples_test)  # y_hat: (N, T)
         y_hat = y_hat.argmax(-1)
         Y_hat = [np.argmax(item) for item in y_hat.get_plain_text().cpu().numpy().tolist()]
         crypten.print(f"predict:{Y_hat}")
 
 
-    testOneParty(input_embeddings)
+    #testOneParty(input_embeddings)
 
-    #saveData(input_embeddings)
+    Y = saveData(input_embeddings)
+    results = Y[::2]
+    results = list(numpy.array(results).flat)
+    write_results(dataPairs, results, output_path)
     #encryptAndInference()

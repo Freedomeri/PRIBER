@@ -7,6 +7,10 @@ import torch.nn.functional as F
 
 logger = logging.getLogger(__name__)
 
+class Activation():
+    @staticmethod
+    def gelu(x):
+        return x * F.sigmoid(x * 1.702)
 
 def swish(x):
     return x * torch.sigmoid(x)
@@ -33,7 +37,8 @@ def gelu_new(x):
 if torch.__version__ < "1.4.0":
     gelu = _gelu_python
 else:
-    gelu = F.gelu
+    #gelu = F.gelu
+    gelu = Activation.gelu
 
 
 def gelu_fast(x):

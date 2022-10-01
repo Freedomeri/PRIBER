@@ -4,6 +4,7 @@
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
+import timeit
 
 import crypten
 import crypten.communicator as comm
@@ -46,11 +47,15 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
     }
     if x.device != y.device:
         raise ValueError(f"x lives on device {x.device} but y on device {y.device}")
+    #import timeit
 
+    #t_start = timeit.default_timer()
     provider = crypten.mpc.get_default_provider()
     a, b, c = provider.generate_additive_triple(
         x.size(), y.size(), op, device=x.device, *args, **kwargs
     )
+    #t_end = timeit.default_timer()
+    #print("generating time: %f" % (t_end-t_start))
 
     from .arithmetic import ArithmeticSharedTensor
 
@@ -75,13 +80,19 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
             raise ValueError("Beaver Triples verification failed!")
 
     # Vectorized reveal to reduce rounds of communication
+    #t_start = timeit.default_timer()
     with IgnoreEncodings([a, b, x, y]):
         epsilon, delta = ArithmeticSharedTensor.reveal_batch([x - a, y - b])
+    #t_end = timeit.default_timer()
+    #print("compute epsilon delta: %f" % (t_end - t_start))
 
+    #t_start = timeit.default_timer()
     # z = c + (a * delta) + (epsilon * b) + epsilon * delta
     c._tensor += getattr(torch, op)(epsilon, b._tensor, *args, **kwargs)
     c._tensor += getattr(torch, op)(a._tensor, delta, *args, **kwargs)
     c += getattr(torch, op)(epsilon, delta, *args, **kwargs)
+    #t_end = timeit.default_timer()
+    #print("final compute time: %f" % (t_end-t_start))
 
     return c
 

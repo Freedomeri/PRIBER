@@ -26,6 +26,7 @@ from ditto.knowledge import *
 
 import crypten
 crypten.init()
+import timeit
 import MyBertModel
 
 
@@ -252,9 +253,12 @@ if __name__ == "__main__":
         else:
             dk_injector = GeneralDKInjector(config, hp.dk)
 
+    t_start = timeit.default_timer()
     # run prediction
     predict(hp.input_path, hp.output_path, config, model,
             summarizer=summarizer,
             max_len=hp.max_len,
             lm=hp.lm,
             dk_injector=dk_injector)
+    t_end = timeit.default_timer()
+    print("Evaluation time:{}".format(t_end-t_start))

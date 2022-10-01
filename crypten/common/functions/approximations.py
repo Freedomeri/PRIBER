@@ -165,6 +165,8 @@ def reciprocal(self, input_in_01=False):
     .. _Newton-Raphson:
         https://en.wikipedia.org/wiki/Newton%27s_method
     """
+    #import timeit
+    #t_start = timeit.default_timer()
     pos_override = {"functions.reciprocal_all_pos": True}
     if input_in_01:
         with cfg.temp_override(pos_override):
@@ -195,6 +197,8 @@ def reciprocal(self, input_in_01=False):
                 result += result - result.square().mul_(self)
             else:
                 result = 2 * result - result * result * self
+        #t_end = timeit.default_timer()
+        #print("reciprocal time:%f" %(t_end-t_start))
         return result
     elif method == "log":
         log_iters = cfg.functions.reciprocal_log_iters

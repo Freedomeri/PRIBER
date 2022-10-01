@@ -181,6 +181,10 @@ class BertEmbeddings(nn.Module):
         token_type_embeddings = self.token_type_embeddings(token_type_ids)
 
         embeddings = inputs_embeds + position_embeddings + token_type_embeddings
+        #temp = []
+        #for i in range (102):
+            #temp.append(embeddings[0][i].sum().tolist())
+
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
         '''

@@ -59,10 +59,11 @@ def get_source_lines_and_file(obj, error_msg=None):
 class RestrictedUnpickler(pickle.Unpickler):
     __SAFE_CLASSES = {
         "builtins.set": builtins.set,
+        "builtins.getattr": builtins.getattr,
         "collections.OrderedDict": collections.OrderedDict,
         "torch.nn.modules.activation.LogSigmoid": torch.nn.modules.activation.LogSigmoid,
         "torch.nn.modules.activation.LogSoftmax": torch.nn.modules.activation.LogSoftmax,
-        "torch.nn.functional.gelu": torch.nn.functional.gelu,
+        "torch.nn.functional.gelu_new": torch.nn.functional.gelu,
         "torch.nn.modules.activation.Tanh": torch.nn.modules.activation.Tanh,
         "torch.nn.modules.activation.ReLU": torch.nn.modules.activation.ReLU,
         "torch.nn.modules.activation.GELU": torch.nn.modules.activation.GELU,

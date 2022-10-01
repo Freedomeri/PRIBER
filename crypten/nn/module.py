@@ -13,6 +13,7 @@ import crypten
 import torch
 import torch.onnx.symbolic_helper as sym_help
 from crypten.common.functions.pooling import _adaptive_pool2d_helper
+import timeit
 
 
 class Module:
@@ -665,7 +666,7 @@ class Graph(Container):
             key: [False for _ in range(len(value_list))]
             for key, value_list in self._graph.items()
         }
-
+        times = []
         def _mark_as_computed(name):
             """Marks a value as having been computed."""
             computed[name] = True
@@ -711,7 +712,18 @@ class Graph(Container):
             if len(input) == 1:
                 input = input[0]  # unpack iterable if possible
             module = self._modules[node_to_compute]
+
+            #if node_to_compute == '176' :
+                #print("176")
+                #import matplotlib.pyplot as plt
+                # test1 = input.get_plain_text().flatten()
+                # plt.plot(test1)
+                # plt.show()
+            #tm_start = timeit.default_timer()
             output = module(input)
+            #tm_end = timeit.default_timer()
+            #times.append(t_end-t_start)
+            #print("module time: %f" % (tm_end-tm_start))
 
             # we may get one output:
             output_names = getattr(module, "_output_names", None)
@@ -963,7 +975,7 @@ class Add(Module):
     def forward(self, input):
         assert isinstance(input, (list, tuple)), "input must be list or tuple"
         assert len(input) == 2, "input must contain two tensors"
-        if input[1].device.type == 'cpu':
+        if input[1].device.type == 'cpu' and torch.cuda.is_available():
             input[1] = input[1].cuda()
         return input[0].add(input[1])
 
