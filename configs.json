@@ -256,7 +256,7 @@
   "testset": "data/er_magellan/Structured/Walmart-Amazon/test.txt"
   },
   {
-  "name": "Textual/Abt-Buy",
+  "name": "Textual_Abt-Buy",
   "task_type": "classification",
   "vocab": ["0", "1"],
   "trainset": "data/er_magellan/Textual/Abt-Buy/train.txt",

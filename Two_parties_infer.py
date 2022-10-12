@@ -11,6 +11,7 @@ import jsonlines
 import sys
 import time
 import timeit
+import argparse
 from tqdm import tqdm
 sys.path.insert(0, "Snippext_public")
 from torch.utils import data
@@ -81,7 +82,7 @@ def load_model(task, saved_state, lm, use_gpu, fp16=False,path = None):
 
     config = configs[task]
     config_list = [config]
-    model = MultiTaskNet([config], device, False, lm=lm,bert_path = path)
+    model = MultiTaskNet([config], device, False, lm=lm,bert_path = path, task = task)
 
     model.load_state_dict(saved_state)
 
@@ -187,19 +188,36 @@ def registerSafeClass():
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--task", type=str, default="Structured_Beer")
+    parser.add_argument("--run_id", type=int, default=0)
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--max_len", type=int, default=128)
+    parser.add_argument("--logdir", type=str, default="checkpoints/")
+    parser.add_argument("--lm", type=str, default='bert')
+    parser.add_argument("--model_path", type=str, default=None)
+    parser.add_argument("--input_path", type=str, default=None)
+    parser.add_argument("--output_path", type=str, default=None)
+    parser.add_argument("--fp16", dest="fp16", action="store_true")
+    parser.add_argument("--alpha_aug", type=float, default=0.8)
+    parser.add_argument("--hidden_size", type=int, default=512)
+    parser.add_argument("--use_gpu", type=bool, default=False)
+
+    hp = parser.parse_args()
+
     ALICE = 0
     BOB = 1
 
     '''static configs'''
-    use_gpu = False
-    lm = 'bert-small'
-    task = 'wdc_all_small'
-    batch_size = 32
-    max_len = 128
-    hidden_size = 512
-    model_path = "/home/smz/models/bert-small-finetuned-wdcs2"
-    input_path = 'input/input_wdc_all_10.txt'
-    output_path = 'output/output_wdc_all_10.txt'
+    use_gpu = hp.use_gpu
+    lm = hp.lm
+    task = hp.task
+    batch_size = hp.batch_size
+    max_len = hp.max_len
+    hidden_size = hp.hidden_size
+    model_path = hp.model_path
+    input_path = hp.input_path
+    output_path = hp.output_path
 
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = splitModel(model_path)
@@ -245,13 +263,13 @@ if __name__ == "__main__":
     torch.set_num_threads(1)
 
     @mpc.run_multiprocess(world_size=2)
-    def saveData(input_embeddings):
+    def saveData(task_name):
         """encrypt data"""
         crypten.save_from_party(samples_bob, "encrypted_data/samples_bob.pt", src=BOB)
 
         """encrypt model"""
         model = crypten.load_from_party(saved_model_path, model_class=MultiTaskNet, src=ALICE)
-        encrypted_model = crypten.nn.from_pytorch(model, torch.empty(1, 128, hidden_size),
+        encrypted_model = crypten.nn.from_pytorch(model, torch.empty(1, max_len, hidden_size),
                                                   transformers=False)
         encrypted_model.encrypt(src=ALICE)
         '''Check that model is encrypted:'''
@@ -300,7 +318,7 @@ if __name__ == "__main__":
 
     #testOneParty(input_embeddings)
 
-    Y = saveData(input_embeddings)
+    Y = saveData(task)
     results = Y[::2]
     results = list(numpy.array(results).flat)
     write_results(dataPairs, results, output_path)

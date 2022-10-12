@@ -19,7 +19,8 @@ class MultiTaskNet(nn.Module):
                  finetuning=True,
                  lm='bert',
                  bert_pt=None,
-                 bert_path=None):
+                 bert_path=None,
+                 task='Structured_Beer'):
         super().__init__()
 
         assert len(task_configs) > 0
@@ -50,8 +51,8 @@ class MultiTaskNet(nn.Module):
             elif lm == 'bert-tiny':
                 self.bert = BertModel.from_pretrained(bert_path,output_hidden_states = True)
             elif lm == 'bert':
-                #self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states = True)
-                self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
+                self.bert = MyBERTModel.from_pretrained(bert_path, output_hidden_states = True)
+                #self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
             elif lm == 'bert-medium':
                 self.bert = BertModel.from_pretrained(bert_path, output_hidden_states=True)
             elif lm == 'bert-small':
@@ -88,9 +89,10 @@ class MultiTaskNet(nn.Module):
         self.finetuning = finetuning
         self.task_configs = task_configs
         self.module_dict = nn.ModuleDict({})
+        self.task = task
 
         # hard corded for now
-        hidden_size = 512
+        hidden_size = 768
         hidden_dropout_prob = 0.1
 
         for config in task_configs:
@@ -119,7 +121,7 @@ class MultiTaskNet(nn.Module):
                 aug_enc=None,
                 second_batch=None,
                 x_enc=None,
-                task='wdc_all_small',
+                task='Structured_Beer',
                 get_enc=False):
         """Forward function of the BERT models for classification/tagging.
 
@@ -141,7 +143,7 @@ class MultiTaskNet(nn.Module):
         #init y if None
         if y is None:
             y = torch.zeros(x.size(0))
-
+        task = self.task
 
         # move input to GPU
         x = x.to(self.device)

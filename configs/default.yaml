@@ -4,7 +4,7 @@ debug:
   debug_mode: False
   validation_mode: False
 encoder:
-  precision_bits: 12
+  precision_bits: 16
 functions:
   max_method: "log_reduction"
 
