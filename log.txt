@@ -344,3 +344,10 @@ Structured_Beer_lm=bert_dk=False_su=False 0.003322
 Structured_Beer_lm=bert_dk=False_su=False 0.005674
 Structured_Beer_lm=bert_dk=False_su=False 0.004627
 Structured_Beer_lm=bert_dk=False_su=False 0.005250
+Structured_Beer_lm=bert_dk=False_su=False 0.005188
+Structured_Beer_lm=bert_dk=False_su=False 0.005635
+Structured_Beer_lm=bert_dk=False_su=False 0.005056
+Structured_Beer_lm=bert_dk=False_su=False 0.005377
+Structured_Beer_lm=bert_dk=False_su=False 0.060210
+Structured_Beer_lm=bert_dk=False_su=False 0.005659
+Structured_Beer_lm=bert_dk=False_su=False 0.005601

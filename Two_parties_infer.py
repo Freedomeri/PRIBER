@@ -219,6 +219,7 @@ if __name__ == "__main__":
     input_path = hp.input_path
     output_path = hp.output_path
 
+
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = splitModel(model_path)
 
@@ -262,8 +263,10 @@ if __name__ == "__main__":
     import crypten.communicator as comm
     torch.set_num_threads(1)
 
+
     @mpc.run_multiprocess(world_size=2)
     def saveData(task_name):
+
         """encrypt data"""
         crypten.save_from_party(samples_bob, "encrypted_data/samples_bob.pt", src=BOB)
 
