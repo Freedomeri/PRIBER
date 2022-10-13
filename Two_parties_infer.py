@@ -260,7 +260,7 @@ if __name__ == "__main__":
     '''encrypt and process for 2 parties'''
     from crypten import mpc
     import crypten.communicator as comm
-    torch.set_num_threads(16)
+    torch.set_num_threads(1)
 
     @mpc.run_multiprocess(world_size=2)
     def saveData(task_name):
