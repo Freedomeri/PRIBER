@@ -16,6 +16,7 @@ from tqdm import tqdm
 sys.path.insert(0, "Snippext_public")
 from torch.utils import data
 from snippext.model import MultiTaskNet
+from snippext.model import EncryptedNet
 from ditto.exceptions import ModelNotFoundError
 from ditto.dataset import DittoDataset
 from ditto.summarize import Summarizer
@@ -56,7 +57,7 @@ def to_str(row, summarizer=None, max_len=256, dk_injector=None):
 
     return content
 
-def load_model(task, saved_state, lm, use_gpu, fp16=False,path = None):
+def load_model(task, saved_state, lm, use_gpu, fp16=False,path = None, hidden_size=768):
     """Load a model for a specific task.
 
     Args:
@@ -82,7 +83,7 @@ def load_model(task, saved_state, lm, use_gpu, fp16=False,path = None):
 
     config = configs[task]
     config_list = [config]
-    model = MultiTaskNet([config], device, False, lm=lm,bert_path = path, task = task)
+    model = EncryptedNet([config], device, False, lm=lm,bert_path = path, task = task,hidden_size=hidden_size)
 
     model.load_state_dict(saved_state)
 
@@ -200,7 +201,7 @@ if __name__ == "__main__":
     parser.add_argument("--output_path", type=str, default=None)
     parser.add_argument("--fp16", dest="fp16", action="store_true")
     parser.add_argument("--alpha_aug", type=float, default=0.8)
-    parser.add_argument("--hidden_size", type=int, default=512)
+    parser.add_argument("--hidden_size", type=int, default=768)
     parser.add_argument("--use_gpu", type=bool, default=False)
 
     hp = parser.parse_args()
@@ -224,7 +225,7 @@ if __name__ == "__main__":
     BertEmbeds, saved_state = splitModel(model_path)
 
     '''load server model'''
-    taskConfig,serverModel = load_model(task,saved_state,lm,use_gpu,path = model_path)
+    taskConfig,serverModel = load_model(task,saved_state,lm,use_gpu,path = model_path,hidden_size=hidden_size)
     saved_model_path = os.path.join(os.getcwd(),'models','serverModel','pytorch_model.bin')
     #serverModel.save_pretrained(saved_model_path)
     torch.save(serverModel,saved_model_path)
@@ -271,7 +272,7 @@ if __name__ == "__main__":
         crypten.save_from_party(samples_bob, "encrypted_data/samples_bob.pt", src=BOB)
 
         """encrypt model"""
-        model = crypten.load_from_party(saved_model_path, model_class=MultiTaskNet, src=ALICE)
+        model = crypten.load_from_party(saved_model_path, model_class=EncryptedNet, src=ALICE)
         encrypted_model = crypten.nn.from_pytorch(model, torch.empty(1, max_len, hidden_size),
                                                   transformers=False)
         encrypted_model.encrypt(src=ALICE)

@@ -220,11 +220,11 @@ def initialize_and_train(task_config,
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if device == 'cpu':
         model = MultiTaskNet([task_config], device,
-                         hp.finetuning, lm=hp.lm, bert_path=hp.bert_path)
+                         hp.finetuning, lm=hp.lm, bert_path=hp.bert_path,task=hp.task,hidden_size=hp.hidden_size)
         optimizer = AdamW(model.parameters(), lr=hp.lr)
     else:
         model = MultiTaskNet([task_config], device,
-                         hp.finetuning, lm=hp.lm, bert_path=hp.bert_path).cuda()
+                         hp.finetuning, lm=hp.lm, bert_path=hp.bert_path,task=hp.task,hidden_size=hp.hidden_size).cuda()
         optimizer = AdamW(model.parameters(), lr=hp.lr)
         if hp.fp16:
             model, optimizer = amp.initialize(model, optimizer, opt_level='O2')
