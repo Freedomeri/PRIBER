@@ -26,6 +26,7 @@ import MyBertModel
 import math
 import torch.nn.functional as nn
 import collections
+import sklearn.metrics as metrics
 import logging
 logging.getLogger().setLevel(logging.INFO)
 os.environ["CUDA_VISIBLE_DEVICES"]="-1"
@@ -101,7 +102,7 @@ def load_dataset(input_path,config,max_len = 128,summarizer=None,dk_injector=Non
     if '.txt' in input_path:
         with jsonlines.open(input_path + '.jsonl', mode='w') as writer:
             for line in open(input_path):
-                writer.write(line.split('\t')[:2])
+                writer.write(line.split('\t')[:3])
         input_path += '.jsonl'
 
     # batch processing
@@ -245,7 +246,13 @@ if __name__ == "__main__":
                                num_workers=0,
                                collate_fn=DittoDataset.pad)
     input_embeddings = []
+
+    '''load labels'''
     Y = []
+    for label in dataRows:
+        Y.append(int(label[2]))
+
+    '''embed locally'''
     with torch.no_grad():
         # print('Classification')
         for i, batch in enumerate(iterator):
@@ -302,6 +309,16 @@ if __name__ == "__main__":
             Y_hat.extend(y_hat)
             crypten.print(f"predict:{Y_hat}")
             crypten.print_communication_stats()
+
+        accuracy = metrics.accuracy_score(Y, Y_hat)
+        precision = metrics.precision_score(Y, Y_hat)
+        recall = metrics.recall_score(Y, Y_hat)
+        f1 = metrics.f1_score(Y, Y_hat)
+        crypten.print("accuracy=%.3f" % accuracy)
+        crypten.print("precision=%.3f" % precision)
+        crypten.print("recall=%.3f" % recall)
+        crypten.print("f1=%.3f" % f1)
+        crypten.print("======================================")
         return Y_hat
 
     def testOneParty(input_embeddings):
@@ -323,7 +340,8 @@ if __name__ == "__main__":
     #testOneParty(input_embeddings)
 
     Y = saveData(task)
-    results = Y[::2]
-    results = list(numpy.array(results).flat)
-    write_results(dataPairs, results, output_path)
+    print(Y)
+    #results = Y[::2]
+    #results = list(numpy.array(results).flat)
+    #write_results(dataPairs, results, output_path)
     #encryptAndInference()
