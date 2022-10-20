@@ -292,7 +292,8 @@ if __name__ == "__main__":
         encrypted_model.eval()
 
         rank = comm.get().get_rank()
-
+        eva_time = 0
+        eva_bytes = 0
         Y_hat = []
         for _batch in range(batch_num):
             start, end = _batch * batch_size, (_batch + 1) * batch_size
@@ -302,7 +303,8 @@ if __name__ == "__main__":
             t_start = timeit.default_timer()
             y_hat = encrypted_model(samples_enc[start:end])  # y_hat: (N, T)
             t_end = timeit.default_timer()
-
+            eva_time += t_end-t_start
+            eva_bytes += comm.get().get_communication_stats().get('bytes')
             crypten.print(f"Evaluation time:{t_end - t_start}")
             y_hat = y_hat.argmax(-1).get_plain_text().cpu().numpy().tolist()
             y_hat = [np.argmax(item) for item in y_hat]
@@ -310,6 +312,9 @@ if __name__ == "__main__":
             crypten.print(f"predict:{Y_hat}")
             crypten.print_communication_stats()
 
+
+        crypten.print(f"Total Evaluation time:{eva_time}")
+        crypten.print(f"Total Communication Bytes:{eva_bytes}")
         accuracy = metrics.accuracy_score(Y, Y_hat)
         precision = metrics.precision_score(Y, Y_hat)
         recall = metrics.recall_score(Y, Y_hat)
