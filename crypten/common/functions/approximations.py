@@ -251,7 +251,9 @@ def sqrt(self):
     .. _Newton-Raphson:
         https://en.wikipedia.org/wiki/Fast_inverse_square_root#Newton's_method
     """
-    return inv_sqrt(self).mul_(self)
+    a=10
+    self = self.div(a**2)
+    return inv_sqrt(self).mul_(self).mul(a)
 
 
 def _eix(self):
