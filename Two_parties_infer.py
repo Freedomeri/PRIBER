@@ -221,7 +221,8 @@ if __name__ == "__main__":
     input_path = hp.input_path
     output_path = hp.output_path
 
-
+    '''set default random seed'''
+    #torch.manual_seed(20)
     '''Split saved Parameters into embeddings and main model params'''
     BertEmbeds, saved_state = splitModel(model_path)
 

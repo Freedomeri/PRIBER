@@ -713,18 +713,23 @@ class Graph(Container):
                 input = input[0]  # unpack iterable if possible
             module = self._modules[node_to_compute]
 
-            #if node_to_compute == '176' :
-                #print("176")
+            #if node_to_compute == '311':
+                #print("311")
+
                 #import matplotlib.pyplot as plt
-                # test1 = input.get_plain_text().flatten()
-                # plt.plot(test1)
-                # plt.show()
+                #test1 = input.get_plain_text().flatten()
+                #plt.plot(test1)
+                #plt.show()
             #tm_start = timeit.default_timer()
             output = module(input)
             #tm_end = timeit.default_timer()
             #times.append(t_end-t_start)
             #print("module time: %f" % (tm_end-tm_start))
 
+            #if node_to_compute == '321' or '322' or '323' or '324' or '325' or '326' or '327':
+            #if type(output) is crypten.mpc.mpc.MPCTensor:
+                #print(node_to_compute,output.get_plain_text().max())
+                #print(node_to_compute, output.get_plain_text().min())
             # we may get one output:
             output_names = getattr(module, "_output_names", None)
             if output_names is None or len(output_names) == 1:
