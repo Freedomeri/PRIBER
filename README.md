@@ -16,4 +16,8 @@ python -m spacy download en_core_web_lg
 ```
 
 ## Start
-You should first finetune a Bert model by specifing task and dataset. You can refer to our colab notebook:"train_PRIBER.ipynb".
+1, You should first finetune a Bert model by specifing task and dataset. You can refer to our colab notebook:"train_PRIBER.ipynb".
+Rename the model file to "pytorch_model.bin" and store it together with json file "config" and text file "vocab".
+
+2, Run "Two_parties_infer.py" with hyper-parameters:
+--task Structured_Beer --
