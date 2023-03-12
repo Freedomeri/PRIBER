@@ -14,3 +14,6 @@ conda install -c conda-forge nvidia-apex
 pip install -r requirements.txt
 python -m spacy download en_core_web_lg
 ```
+
+## Start
+You should first finetune a Bert model by specifing task and dataset. You can refer to our colab notebook:"train_PRIBER.ipynb".
